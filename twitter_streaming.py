@@ -2,7 +2,8 @@
 from tweepy.streaming import StreamListener
 from tweepy import OAuthHandler
 from tweepy import Stream
-import twitter_cred as cred
+import twitter_cred as cred #private twitter credentials
+
 
 
 
