@@ -1,17 +1,31 @@
+#This module takes user input to filter tweets by, then saves these filtered tweets into data.txt
+
 #Import the necessary methods from tweepy library
-from tweepy.streaming import StreamListener
-from tweepy import OAuthHandler
-from tweepy import Stream
-import twitter_cred as cred #private twitter credentials
+import tweepy
+import os
+
+consumer_key = os.environ['consumer_key']
+consumer_secret = os.environ['consumer_secret']
+access_token = os.environ['access_token']
+access_token_secret = os.environ['access_token_secret']
+'''
+To add environment variables
+------------------------------------
+For Windows:
+control panel > system and security > system > advanced system settings > environment variables
+
+For Mac:
+add to .bash_profile in home directory
+'''
 
 
-
-
-#This is a basic listener that just prints received tweets to stdout.
-class StdOutListener(StreamListener):
+#This is a basic listener that prints tweets and saves to data.txt.
+class listener(tweepy.StreamListener):
 
     def on_data(self, data):
         print(data)
+        with open('data.txt','a') as thing:
+            thing.write(data)
         return True
 
     def on_error(self, status):
@@ -21,10 +35,14 @@ class StdOutListener(StreamListener):
 if __name__ == '__main__':
 
     #This handles Twitter authetification and the connection to Twitter Streaming API
-    l = StdOutListener()
-    auth = OAuthHandler(cred.consumer_key, cred.consumer_secret)
-    auth.set_access_token(cred.access_token, cred.access_token_secret)
-    stream = Stream(auth, l)
+    auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+    auth.set_access_token(access_token, access_token_secret)
+    stream = tweepy.Stream(auth, listener()) #connects to twitter api
 
-    #This line filter Twitter Streams to capture data by the keywords: 'python', 'javascript', 'ruby'
-    stream.filter(track=['python', 'javascript', 'ruby'])
+    #This captures input to filer tweets by
+    filters = []
+    while True:
+        user_input = input('Enter a keyword to filter tweets by (Type EXIT to stop): ')
+        if user_input == 'EXIT': break
+        else: filters.append(user_input)
+    stream.filter(track=filters)
