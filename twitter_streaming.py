@@ -28,6 +28,7 @@ class listener(tweepy.StreamListener):
             thing.write(raw_data)
         data = json.loads(raw_data)
         print(data['text'])
+        print('-----------------')
         return True
 
     def on_error(self, status):
