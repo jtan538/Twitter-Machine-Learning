@@ -4,6 +4,7 @@
 import tweepy
 import os
 import json
+import re
 
 consumer_key = os.environ['consumer_key']
 consumer_secret = os.environ['consumer_secret']
@@ -27,8 +28,14 @@ class listener(tweepy.StreamListener):
         with open('raw_data.txt','a') as thing:
             thing.write(raw_data)
         data = json.loads(raw_data)
-        print(data['text'])
-        print('-----------------')
+        if 'RT' not in data['text'][0:3]:
+	        with open('data.txt','a') as thing:
+	        	try:
+	        		thing.write(clean_tweet(data['extended_tweet']['full_text'])+'\n')
+	        	except KeyError:
+	        		thing.write(clean_tweet(data['text'])+'\n')
+	        print(data['text'])
+	        print('-----------------')
         return True
 
     def on_error(self, status):
@@ -36,6 +43,9 @@ class listener(tweepy.StreamListener):
             return False
         print(status)
 
+def clean_tweet(tweet):
+    return ' '.join(re.sub("(@[A-Za-z0-9_]+)|([^0-9A-Za-z \t])|(\w+:\/\/\S+)", " ", tweet).split()) 
+    # first group takes out mentions 'ex: @Susan', second group takes out special characters, third group takes out links
 
 if __name__ == '__main__':
 
@@ -45,7 +55,7 @@ if __name__ == '__main__':
     stream = tweepy.Stream(auth, listener()) #connects to twitter api
 
     #This captures input to filer tweets by
-    filters = ['python']
+    filters = ['@realdonaldtrump']
     # while True:
     #     user_input = input('Enter a keyword to filter tweets by (Type EXIT to stop): ')
     #     if user_input == 'EXIT': break
